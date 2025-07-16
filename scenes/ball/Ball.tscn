@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bqr8xvp5qxmno"]
 
-[ext_resource type="Script" path="res://scripts/ball/Ball.gd" id="1_8s9hk"]
+[ext_resource type="Script" uid="uid://cx05y2lmfih41" path="res://scripts/ball/Ball.gd" id="1_8s9hk"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1hlqp"]
 radius = 15.0
@@ -42,4 +42,4 @@ offset_right = 10.0
 offset_bottom = 10.0
 text = "1"
 horizontal_alignment = 1
-vertical_alignment = 1 
+vertical_alignment = 1

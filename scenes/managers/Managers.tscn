@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://bqr8xvp5qxmno"]
+
+[ext_resource type="Script" path="res://scripts/managers/SceneManager.gd" id="1_scene"]
+[ext_resource type="Script" path="res://scripts/managers/GameManager.gd" id="2_game"]
+[ext_resource type="Script" path="res://scripts/managers/CatManager.gd" id="3_cat"]
+
+[node name="Managers" type="Node"]
+script = ExtResource("1_scene")
+
+[node name="SceneManager" type="Node" parent="." groups=["managers"]]
+script = ExtResource("1_scene")
+
+[node name="GameManager" type="Node" parent="." groups=["managers"]]
+script = ExtResource("2_game")
+
+[node name="CatManager" type="Node" parent="." groups=["managers"]]
+script = ExtResource("3_cat") 

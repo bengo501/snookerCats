@@ -26,14 +26,16 @@ EffectsManager="*res://scripts/managers/EffectsManager.gd"
 CatManager="*res://scripts/managers/CatManager.gd"
 CardManager="*res://scripts/managers/CardManager.gd"
 CueManager="*res://scripts/managers/CueManager.gd"
-GameManager="*res://scripts/GameManager.gd"
+GameManager="*res://scripts/managers/GameManager.gd"
+PlayerManager="*res://scripts/managers/PlayerManager.gd"
 
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
-window/size/mode=2
+window/size/mode=0
 window/stretch/mode="canvas_items"
+window/size/fullscreen=false
 
 [input]
 
@@ -83,3 +85,4 @@ action={
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"

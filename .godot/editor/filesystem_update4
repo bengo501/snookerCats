@@ -1,1 +1,14 @@
 res://scenes/main/Main.tscn
+res://scripts/GameManager.gd
+res://scripts/Main.gd
+res://scripts/ball/Ball.gd
+res://scenes/ball/Ball.tscn
+res://scripts/managers/GameStateManager.gd
+res://scripts/managers/CatManager.gd
+res://scripts/managers/SceneManager.gd
+res://scripts/managers/GameManager.gd
+res://scripts/TestManagers.gd
+res://scripts/managers/CueManager.gd
+res://scripts/managers/PlayerManager.gd
+res://scripts/TestSimple.gd
+res://scripts/player/Player.gd

@@ -1,9 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://b4n8p8qxvxqwg"]
+[gd_scene load_steps=6 format=3 uid="uid://b4n8p8qxvxqwg"]
 
 [ext_resource type="Script" uid="uid://boecqlxht6jpk" path="res://scripts/Main.gd" id="1_0s8hk"]
 [ext_resource type="Script" uid="uid://bnki7lqxeyyno" path="res://scripts/TestManagers.gd" id="2_test"]
 [ext_resource type="Script" uid="uid://ngmnmnniqxd3" path="res://scripts/TestSimple.gd" id="3_simple"]
-[ext_resource type="PackedScene" uid="uid://bqr8xvp5qxmno" path="res://scenes/ball/Ball.tscn" id="4_player"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1hlqp"]
 size = Vector2(1920, 40)
@@ -19,9 +18,6 @@ script = ExtResource("2_test")
 
 [node name="TestSimple" type="Node" parent="."]
 script = ExtResource("3_simple")
-
-[node name="Player" parent="." instance=ExtResource("4_player")]
-position = Vector2(400, 540)
 
 [node name="Table" type="Node2D" parent="."]
 position = Vector2(960, 540)

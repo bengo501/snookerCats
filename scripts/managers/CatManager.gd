@@ -1,208 +1,187 @@
 extends Node
 
-signal cat_health_changed(cat_id: int, new_health: int)
-signal cat_died(cat_id: int)
-signal cat_skill_used(cat_id: int, skill_name: String)
+signal player_data_updated(player_id: int)
+signal player_level_up(player_id: int, new_level: int)
 
-class_name CatData
-extends Resource
+enum CatType {
+	ORANGE,
+	BLACK,
+	WHITE,
+	STRIPED,
+	PERSIAN
+}
 
-@export var cat_id: int
-@export var name: String
-@export var max_health: int = 100
-@export var current_health: int = 100
-@export var speed: float = 1.0
-@export var skin_texture: Texture2D
-@export var special_ability: String = ""
-@export var cards_in_hand: Array[String] = []
-@export var is_ai: bool = false
+class PlayerData:
+	var id: int
+	var name: String
+	var cat_type: CatType
+	var level: int
+	var experience: int
+	var total_score: int
+	var games_won: int
+	var games_played: int
+	var favorite_shot: String
+	var accuracy: float
+	var power_control: float
+	
+	func _init(player_id: int, player_name: String, cat: CatType):
+		id = player_id
+		name = player_name
+		cat_type = cat
+		level = 1
+		experience = 0
+		total_score = 0
+		games_won = 0
+		games_played = 0
+		favorite_shot = "straight"
+		accuracy = 0.5
+		power_control = 0.5
+	
+	func add_experience(exp: int):
+		experience += exp
+		_check_level_up()
+	
+	func _check_level_up():
+		var exp_needed = level * 100
+		if experience >= exp_needed:
+			level += 1
+			experience -= exp_needed
+			# Melhorar stats com level up
+			accuracy = min(accuracy + 0.05, 1.0)
+			power_control = min(power_control + 0.05, 1.0)
+	
+	func get_win_rate() -> float:
+		if games_played == 0:
+			return 0.0
+		return float(games_won) / float(games_played)
+	
+	func get_cat_color() -> Color:
+		match cat_type:
+			CatType.ORANGE:
+				return Color.ORANGE
+			CatType.BLACK:
+				return Color.BLACK
+			CatType.WHITE:
+				return Color.WHITE
+			CatType.STRIPED:
+				return Color(0.5, 0.3, 0.1)  # Marrom
+			CatType.PERSIAN:
+				return Color(0.8, 0.8, 0.9)  # Cinza claro
+			_:
+				return Color.GRAY
 
-var current_cats: Dictionary = {}
-var cat_scenes: Dictionary = {}
-var cat_data_resources: Dictionary = {}
+var players: Dictionary = {}
+var current_player_id: int = 1
+var max_players: int = 2
 
 func _ready():
-	print("CatManager initialized")
-	_load_cat_data()
-
-func _load_cat_data():
-	# Carregar dados dos gatos de arquivos de recursos
-	var cat_files = [
-		"res://data/cats/orange_cat.tres",
-		"res://data/cats/black_cat.tres",
-		"res://data/cats/white_cat.tres",
-		"res://data/cats/gray_cat.tres"
-	]
+	print("CatManager inicializado")
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	
-	for file_path in cat_files:
-		if ResourceLoader.exists(file_path):
-			var cat_data = load(file_path) as CatData
-			if cat_data:
-				cat_data_resources[cat_data.cat_id] = cat_data
-				print("Loaded cat data for: ", cat_data.name)
-
-func create_cat(cat_id: int, position: Vector2 = Vector2.ZERO, is_player: bool = true) -> Node2D:
-	if not cat_data_resources.has(cat_id):
-		print("Cat data not found for ID: ", cat_id)
-		return null
+	# Aguardar um frame para garantir que a árvore de cena esteja pronta
+	await get_tree().process_frame
 	
-	var cat_data = cat_data_resources[cat_id]
-	var cat_scene = preload("res://scenes/player/Cat.tscn").instantiate()
+	# Criar jogadores padrão
+	_create_default_players()
+
+func _create_default_players():
+	# Jogador 1 - Gato Laranja
+	var player1 = PlayerData.new(1, "Gato Laranja", CatType.ORANGE)
+	player1.favorite_shot = "straight"
+	player1.accuracy = 0.6
+	player1.power_control = 0.7
+	players[1] = player1
 	
-	# Configurar dados do gato
-	cat_scene.setup_cat(cat_data, is_player)
-	cat_scene.global_position = position
+	# Jogador 2 - Gato Preto
+	var player2 = PlayerData.new(2, "Gato Preto", CatType.BLACK)
+	player2.favorite_shot = "curve"
+	player2.accuracy = 0.7
+	player2.power_control = 0.5
+	players[2] = player2
 	
-	# Conectar sinais
-	cat_scene.health_changed.connect(_on_cat_health_changed)
-	cat_scene.died.connect(_on_cat_died)
-	cat_scene.skill_used.connect(_on_cat_skill_used)
+	print("Jogadores padrão criados")
+
+func get_player(player_id: int) -> PlayerData:
+	return players.get(player_id, null)
+
+func get_current_player() -> PlayerData:
+	return get_player(current_player_id)
+
+func set_current_player(player_id: int):
+	if players.has(player_id):
+		current_player_id = player_id
+		print("Jogador atual mudou para: ", players[player_id].name)
+
+func add_player(name: String, cat_type: CatType) -> int:
+	if players.size() >= max_players:
+		print("ERRO: Número máximo de jogadores atingido")
+		return -1
 	
-	# Armazenar referência
-	current_cats[cat_id] = cat_scene
+	var new_id = players.size() + 1
+	var new_player = PlayerData.new(new_id, name, cat_type)
+	players[new_id] = new_player
 	
-	print("Created cat: ", cat_data.name, " at position: ", position)
-	return cat_scene
+	print("Novo jogador adicionado: ", name, " (ID: ", new_id, ")")
+	player_data_updated.emit(new_id)
+	return new_id
 
-func get_cat(cat_id: int) -> Node2D:
-	return current_cats.get(cat_id, null)
-
-func get_cat_data(cat_id: int) -> CatData:
-	return cat_data_resources.get(cat_id, null)
-
-func get_all_cats() -> Array:
-	return current_cats.values()
-
-func get_player_cats() -> Array:
-	var player_cats = []
-	for cat in current_cats.values():
-		if cat.is_player:
-			player_cats.append(cat)
-	return player_cats
-
-func get_ai_cats() -> Array:
-	var ai_cats = []
-	for cat in current_cats.values():
-		if not cat.is_player:
-			ai_cats.append(cat)
-	return ai_cats
-
-func damage_cat(cat_id: int, damage: int):
-	var cat = get_cat(cat_id)
-	if cat:
-		cat.take_damage(damage)
-
-func heal_cat(cat_id: int, heal_amount: int):
-	var cat = get_cat(cat_id)
-	if cat:
-		cat.heal(heal_amount)
-
-func set_cat_speed(cat_id: int, speed_multiplier: float):
-	var cat = get_cat(cat_id)
-	if cat:
-		cat.set_speed_multiplier(speed_multiplier)
-
-func give_card_to_cat(cat_id: int, card_name: String):
-	var cat_data = get_cat_data(cat_id)
-	if cat_data:
-		cat_data.cards_in_hand.append(card_name)
-		print("Gave card '", card_name, "' to cat: ", cat_data.name)
-
-func use_cat_skill(cat_id: int, skill_name: String):
-	var cat = get_cat(cat_id)
-	if cat:
-		cat.use_skill(skill_name)
-
-func get_cat_cards(cat_id: int) -> Array[String]:
-	var cat_data = get_cat_data(cat_id)
-	if cat_data:
-		return cat_data.cards_in_hand
-	return []
-
-func remove_card_from_cat(cat_id: int, card_name: String):
-	var cat_data = get_cat_data(cat_id)
-	if cat_data:
-		var index = cat_data.cards_in_hand.find(card_name)
-		if index != -1:
-			cat_data.cards_in_hand.remove_at(index)
-			print("Removed card '", card_name, "' from cat: ", cat_data.name)
-
-func get_alive_cats() -> Array:
-	var alive_cats = []
-	for cat in current_cats.values():
-		if cat.is_alive():
-			alive_cats.append(cat)
-	return alive_cats
-
-func get_dead_cats() -> Array:
-	var dead_cats = []
-	for cat in current_cats.values():
-		if not cat.is_alive():
-			dead_cats.append(cat)
-	return dead_cats
-
-func respawn_cat(cat_id: int, position: Vector2 = Vector2.ZERO):
-	var cat = get_cat(cat_id)
-	if cat:
-		cat.respawn(position)
-
-func remove_cat(cat_id: int):
-	if current_cats.has(cat_id):
-		var cat = current_cats[cat_id]
-		cat.queue_free()
-		current_cats.erase(cat_id)
-		print("Removed cat with ID: ", cat_id)
-
-func clear_all_cats():
-	for cat in current_cats.values():
-		cat.queue_free()
-	current_cats.clear()
-	print("All cats cleared")
-
-# Métodos de callback para sinais
-func _on_cat_health_changed(cat_id: int, new_health: int):
-	cat_health_changed.emit(cat_id, new_health)
-	print("Cat ", cat_id, " health changed to: ", new_health)
-
-func _on_cat_died(cat_id: int):
-	cat_died.emit(cat_id)
-	print("Cat ", cat_id, " died")
+func update_player_stats(player_id: int, game_score: int, won: bool):
+	var player = get_player(player_id)
+	if not player:
+		print("ERRO: Jogador não encontrado: ", player_id)
+		return
 	
-	# Verificar se o jogo acabou
-	var alive_cats = get_alive_cats()
-	if alive_cats.size() == 0:
-		GameStateManager.end_game()
-
-func _on_cat_skill_used(cat_id: int, skill_name: String):
-	cat_skill_used.emit(cat_id, skill_name)
-	print("Cat ", cat_id, " used skill: ", skill_name)
+	player.total_score += game_score
+	player.games_played += 1
+	if won:
+		player.games_won += 1
+		player.add_experience(50)  # Bônus por vitória
+	else:
+		player.add_experience(10)  # Experiência por jogar
 	
-	# Aplicar efeitos visuais
-	EffectsManager.play_skill_effect(cat_id, skill_name)
+	print("Stats atualizadas para ", player.name, ": Score=", player.total_score, " Level=", player.level)
+	player_data_updated.emit(player_id)
 
-# Métodos para salvar/carregar dados
-func save_cat_data():
-	var save_data = {}
-	for cat_id in cat_data_resources.keys():
-		save_data[cat_id] = cat_data_resources[cat_id]
-	
-	# Salvar em arquivo
-	var file = FileAccess.open("user://cat_data.save", FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify(save_data))
-		file.close()
+func get_player_accuracy_modifier(player_id: int) -> float:
+	var player = get_player(player_id)
+	if player:
+		return player.accuracy
+	return 0.5
 
-func load_cat_data():
-	var file = FileAccess.open("user://cat_data.save", FileAccess.READ)
-	if file:
-		var json_string = file.get_as_text()
-		file.close()
-		
-		var json = JSON.new()
-		var parse_result = json.parse(json_string)
-		if parse_result == OK:
-			var save_data = json.data
-			# Processar dados carregados
-			print("Cat data loaded successfully")
-		else:
-			print("Failed to parse cat save data") 
+func get_player_power_modifier(player_id: int) -> float:
+	var player = get_player(player_id)
+	if player:
+		return player.power_control
+	return 0.5
+
+func get_player_favorite_shot(player_id: int) -> String:
+	var player = get_player(player_id)
+	if player:
+		return player.favorite_shot
+	return "straight"
+
+func get_all_players() -> Array:
+	return players.values()
+
+func get_player_count() -> int:
+	return players.size()
+
+func reset_player_stats(player_id: int):
+	var player = get_player(player_id)
+	if player:
+		player.total_score = 0
+		player.games_won = 0
+		player.games_played = 0
+		player.experience = 0
+		player.level = 1
+		print("Stats resetadas para: ", player.name)
+		player_data_updated.emit(player_id)
+
+func get_player_color(player_id: int) -> Color:
+	var player = get_player(player_id)
+	if player:
+		return player.get_cat_color()
+	return Color.GRAY
+
+func get_manager_type() -> String:
+	return "CatManager" 
