@@ -1,0 +1,157 @@
+[gd_scene load_steps=4 format=3 uid="uid://b4n8p8qxvxqwg"]
+
+[ext_resource type="Script" uid="uid://boecqlxht6jpk" path="res://scripts/Main.gd" id="1_0s8hk"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1hlqp"]
+size = Vector2(1920, 40)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1hlqp"]
+radius = 15.0
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_0s8hk")
+
+[node name="Table" type="Node2D" parent="."]
+position = Vector2(960, 540)
+
+[node name="TableSprite" type="ColorRect" parent="Table"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -600.0
+offset_top = -300.0
+offset_right = 600.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.133333, 0.313726, 0.0862745, 1)
+
+[node name="TableBorder" type="ColorRect" parent="Table"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -620.0
+offset_top = -320.0
+offset_right = 620.0
+offset_bottom = 320.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.545098, 0.270588, 0.0745098, 1)
+
+[node name="Walls" type="Node2D" parent="Table"]
+
+[node name="TopWall" type="StaticBody2D" parent="Table/Walls"]
+position = Vector2(0, -320)
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table/Walls/TopWall"]
+shape = SubResource("RectangleShape2D_1hlqp")
+
+[node name="BottomWall" type="StaticBody2D" parent="Table/Walls"]
+position = Vector2(0, 320)
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table/Walls/BottomWall"]
+shape = SubResource("RectangleShape2D_1hlqp")
+
+[node name="LeftWall" type="StaticBody2D" parent="Table/Walls"]
+position = Vector2(-620, 0)
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table/Walls/LeftWall"]
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_1hlqp")
+
+[node name="RightWall" type="StaticBody2D" parent="Table/Walls"]
+position = Vector2(620, 0)
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table/Walls/RightWall"]
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_1hlqp")
+
+[node name="Balls" type="Node2D" parent="."]
+
+[node name="CueBall" type="RigidBody2D" parent="Balls"]
+position = Vector2(500, 540)
+collision_layer = 4
+collision_mask = 6
+gravity_scale = 0.0
+lock_rotation = true
+linear_damp = 2.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Balls/CueBall"]
+shape = SubResource("CircleShape2D_1hlqp")
+
+[node name="Sprite" type="ColorRect" parent="Balls/CueBall"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -15.0
+offset_top = -15.0
+offset_right = 15.0
+offset_bottom = 15.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HUD" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PowerBar" type="ProgressBar" parent="UI/HUD"]
+layout_mode = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 50.0
+offset_top = -100.0
+offset_right = 300.0
+offset_bottom = -50.0
+value = 50.0
+
+[node name="Label" type="Label" parent="UI/HUD/PowerBar"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -31.0
+offset_top = -11.5
+offset_right = 31.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "POWER"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Instructions" type="Label" parent="UI/HUD"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -400.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 120.0
+text = "SNOOKER CATS
+WASD - Move cursor
+SPACE - Shoot
+Mouse - Aim and shoot"
+horizontal_alignment = 2
+vertical_alignment = 1
